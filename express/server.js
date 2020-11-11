@@ -8,10 +8,15 @@ const bodyParser = require('body-parser');
 const router = express.Router();
 router.get('/', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.write('<h1>Hello from Express.js!</h1>');
+  res.write('<h1>Hello George.js!</h1>');
   res.end();
 });
+// https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi
 router.get('/another', (req, res) => res.json({ route: req.originalUrl }));
+router.get('/pont-gratuit', (req, res) => res.json({ pont: 'gratuit' }));
+router.get('/pont-premium-fotbal', (req, res) => res.json({ pont: 'premium_fotbal' }));
+router.get('/pont-premium-tenis', (req, res) => res.json({ pont: 'premium_tenis' }));
+router.get('/pont-premium-baschet', (req, res) => res.json({ pont: 'premium_baschet' }));
 router.post('/', (req, res) => res.json({ postBody: req.body }));
 
 app.use(bodyParser.json());
