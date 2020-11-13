@@ -28,8 +28,5 @@
     "nodemon": "^1.19.2",
     "serverless-http": "^2.3.0"
   },
-  "dependencies": {
-    "axios": "^0.21.0",
-    "superagent": "^6.1.0"
-  }
+  "dependencies": {}
 }

@@ -4,8 +4,7 @@ const path = require('path');
 const serverless = require('serverless-http');
 const app = express();
 const bodyParser = require('body-parser');
-const axios = require('axios');
-const superagent = require('superagent');
+const https = require('https');
 
 const PoApi = require('../util/api');
 
@@ -27,10 +26,10 @@ function getKey(d) {
 }
 
 function getFreeGame(response) {
-  return response.body.pontGratisAzi[0].game;
+  return response.pontGratisAzi[0].game;
 }
 function getFreeBet(response) {
-  return response.body.pontGratisAzi[0].bet;
+  return response.pontGratisAzi[0].bet;
 }
 
 function getPontGratuitMessages() {
@@ -123,11 +122,43 @@ router.get('/', (req, res) => {
 
 router.get('/pont-gratuit', async (req, response) => {
 
-  superagent.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi')
-  // .query({ api_key: 'DEMO_KEY', date: '2017-08-02' })
-  .end((err, res) => {
-    if (err) { return console.log(err); }
-    let messages = [
+  // superagent.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi')
+  // // .query({ api_key: 'DEMO_KEY', date: '2017-08-02' })
+  // .end((err, res) => {
+  //   if (err) { return console.log(err); }
+  //   let messages = [
+  //     {
+  //       "type": "text",
+  //       "text": "🎾 " + getFreeGame(res)
+  //     },
+  //     {
+  //       "type": "text",
+  //       "text": "🏆 " + getFreeBet(res)
+  //     }
+  //   ]
+  //   console.log(messages)
+
+  //   return response.json({
+  //     "version": "v2",
+  //     "content": {
+  //       "messages": messages
+  //     }
+  //   })
+  // });
+
+  https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi', (resp) => {
+    let data = '';
+
+    // A chunk of data has been recieved.
+    resp.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    // The whole response has been received. Print out the result.
+    resp.on('end', () => {
+      let res = JSON.parse(data);
+
+      let messages = [
       {
         "type": "text",
         "text": "🎾 " + getFreeGame(res)
@@ -145,6 +176,10 @@ router.get('/pont-gratuit', async (req, response) => {
         "messages": messages
       }
     })
+  });
+
+  }).on("error", (err) => {
+    console.log("Error: " + err.message);
   });
 });
 
