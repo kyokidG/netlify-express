@@ -88,9 +88,9 @@ router.get('/pont-gratuit', async (req, response) => {
         let res = JSON.parse(data);
         let messages;
         if (isFotbal(res.pontGratisAzi[0])) { 
-          messages = [getFotbalMessageText(getFreeGame(res), getFreeBet(res))]
+          messages = [...getFotbalMessageText(getFreeGame(res), getFreeBet(res))]
         } else { 
-          messages = [getTennisMessageText(getFreeGame(res), getFreeBet(res))]
+          messages = [...getTennisMessageText(getFreeGame(res), getFreeBet(res))]
         }
 
         FREE[todayKey] = messages;
