@@ -9,22 +9,19 @@ const https = require('https');
 const PoApi = require('../util/api');
 
 
-const FREE = {
-  '12-11-2020': {},
-}
+const FREE = {}
+const PREMIUM_FOTBAL = {}
+const PREMIUM_TENIS = {}
 
-const PREMIUM_FOTBAL = {
-  '12-11-2020': [],
-}
-
-const PREMIUM_TENIS = {
-  '12-11-2020': [],
+function isFotbal(res) {
+  return (res.league.toLowerCase().indexOf('league') > -1) || 
+     (res.league.toLowerCase().indexOf('serie') > -1) ||
+     (res.league.toLowerCase().indexOf('liga') > -1)
 }
 
 function getKey(d) {
   return d.getDate() + '-' + d.getMonth()+1 + '-' + d.getFullYear();
 }
-
 function getFreeGame(response) {
   return response.pontGratisAzi[0].game;
 }
@@ -32,85 +29,36 @@ function getFreeBet(response) {
   return response.pontGratisAzi[0].bet;
 }
 
-function getPontGratuitMessages() {
-  // let poApi = new PoApi(http);
-
-
+function getTennisMessageText(game, bet) {
+  return [{
+    "type": "text",
+    "text": "🎾 " + game
+  },
+  {
+    "type": "text",
+    "text": "🏆 " + bet
+  }]
+}
+function getFotbalMessageText(game, bet) {
+  return [{
+    "type": "text",
+    "text": "⚽️ " + game
+  },
+  {
+    "type": "text",
+    "text": "🏆 " + bet
+  }]
 }
 
-function getPontPremiumFotbalMessages() {
-  return [
-    {
-      "type": "text",
-      "text": "⚽️ Eveniment premium fotbal 1 "
-    },
-    {
-      "type": "text",
-      "text": "🏆 Castigator Eveniment premium fotbal 1"
-    },
-    {
-      "type": "text",
-      "text": "..."
-    },
-    {
-      "type": "text",
-      "text": "⚽️ Eveniment premium fotbal 2"
-    },
-    {
-      "type": "text",
-      "text": "🏆 Castigator Eveniment premium fotbal 2"
-    },
-    {
-      "type": "text",
-      "text": "..."
-    },
-    {
-      "type": "text",
-      "text": "⚽️ Eveniment premium fotbal 3"
-    },
-    {
-      "type": "text",
-      "text": "🏆 Castigator Eveniment premium fotbal 3"
+function getFinalResponse(messages) {
+  return {
+    "version": "v2",
+    "content": {
+      "messages": messages
     }
-  ]
+  }
 }
 
-function getPontPremiumTenisMessages() {
-  return [
-    {
-      "type": "text",
-      "text": "🎾 Eveniment premium tenis 1 "
-    },
-    {
-      "type": "text",
-      "text": "🏆 Castigator Eveniment premium tenis 1"
-    },
-    {
-      "type": "text",
-      "text": "..."
-    },
-    {
-      "type": "text",
-      "text": "🎾 Eveniment premium tenis 2"
-    },
-    {
-      "type": "text",
-      "text": "🏆 Castigator Eveniment premium tenis 2"
-    },
-    {
-      "type": "text",
-      "text": "..."
-    },
-    {
-      "type": "text",
-      "text": "🎾 Eveniment premium tenis 3"
-    },
-    {
-      "type": "text",
-      "text": "🏆 Castigator Eveniment premium tenis 3"
-    }
-  ]
-}
 
 const router = express.Router();
 router.get('/', (req, res) => {
@@ -121,84 +69,117 @@ router.get('/', (req, res) => {
 });
 
 router.get('/pont-gratuit', async (req, response) => {
+  let today = new Date();
+  let todayKey = getKey(today);
+  if (FREE[todayKey] && FREE[todayKey].length) {
+    // console.log("fetched from cache: ",FREE[todayKey])
+    return response.json(getFinalResponse(FREE[todayKey]))
+  } else {
+    https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi', (resp) => {
+      let data = '';
 
-  // superagent.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi')
-  // // .query({ api_key: 'DEMO_KEY', date: '2017-08-02' })
-  // .end((err, res) => {
-  //   if (err) { return console.log(err); }
-  //   let messages = [
-  //     {
-  //       "type": "text",
-  //       "text": "🎾 " + getFreeGame(res)
-  //     },
-  //     {
-  //       "type": "text",
-  //       "text": "🏆 " + getFreeBet(res)
-  //     }
-  //   ]
-  //   console.log(messages)
+      // A chunk of data has been recieved.
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
 
-  //   return response.json({
-  //     "version": "v2",
-  //     "content": {
-  //       "messages": messages
-  //     }
-  //   })
-  // });
+      // The whole response has been received. Print out the result.
+      resp.on('end', () => {
+        let res = JSON.parse(data);
+        let messages;
+        if (isFotbal(res.pontGratisAzi[0])) { 
+          messages = [getFotbalMessageText(getFreeGame(res), getFreeBet(res))]
+        } else { 
+          messages = [getTennisMessageText(getFreeGame(res), getFreeBet(res))]
+        }
 
-  https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi', (resp) => {
-    let data = '';
+        FREE[todayKey] = messages;
+        // console.log("fetched from sheets db: ", messages)
 
-    // A chunk of data has been recieved.
-    resp.on('data', (chunk) => {
-      data += chunk;
+        return response.json(getFinalResponse(messages))
     });
 
-    // The whole response has been received. Print out the result.
-    resp.on('end', () => {
-      let res = JSON.parse(data);
-
-      let messages = [
-      {
-        "type": "text",
-        "text": "🎾 " + getFreeGame(res)
-      },
-      {
-        "type": "text",
-        "text": "🏆 " + getFreeBet(res)
-      }
-    ]
-    console.log(messages)
-
-    return response.json({
-      "version": "v2",
-      "content": {
-        "messages": messages
-      }
-    })
-  });
-
-  }).on("error", (err) => {
-    console.log("Error: " + err.message);
-  });
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    });
+  }
 });
 
-router.get('/pont-premium-fotbal', (req, res) => {
-  return res.json({
-    "version": "v2",
-    "content": {
-      "messages": getPontPremiumFotbalMessages()
-    }
-  })
+router.get('/pont-premium-fotbal', (req, response) => {
+  let today = new Date();
+  let todayKey = getKey(today);
+  if (PREMIUM_FOTBAL[todayKey] && PREMIUM_FOTBAL[todayKey].length) {
+    // console.log("fetched from cache: ", PREMIUM_FOTBAL[todayKey])
+    return response.json(getFinalResponse(PREMIUM_FOTBAL[todayKey]))
+  } else {
+    https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/fotbalAzi', (resp) => {
+      let data = '';
+
+      // A chunk of data has been recieved.
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      // The whole response has been received. Print out the result.
+      resp.on('end', () => {
+        let res = JSON.parse(data);
+        let messages = [];
+        let items = res.fotbalAzi;
+        for(let i=0;i<=items.length;i++) {
+          let pont = items[i] || null;
+          if(pont) {
+            messages.push(getFotbalMessageText(items[i].game, items[i].bet))
+          }
+        }
+
+        PREMIUM_FOTBAL[todayKey] = messages;
+        // console.log("fetched from sheets db: ", PREMIUM_FOTBAL[todayKey])
+        return response.json(getFinalResponse(messages))
+    });
+
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    });
+  }
 });
 
-router.get('/pont-premium-tenis', (req, res) => {
-  return res.json({
-    "version": "v2",
-    "content": {
-      "messages": getPontPremiumTenisMessages()
-    }
-  })
+router.get('/pont-premium-tenis', (req, response) => {
+  let today = new Date();
+  let todayKey = getKey(today);
+  if (PREMIUM_TENIS[todayKey] && PREMIUM_TENIS[todayKey].length) {
+    // console.log("fetched from cache: ", PREMIUM_TENIS[todayKey])
+    return response.json(getFinalResponse(PREMIUM_TENIS[todayKey]))
+  } else {
+    https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/tenisAzi', (resp) => {
+      let data = '';
+
+      // A chunk of data has been recieved.
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      // The whole response has been received. Print out the result.
+      resp.on('end', () => {
+        let res = JSON.parse(data);
+        let messages = [];
+        let items = res.tenisAzi;
+        for(let i=0;i<=items.length;i++) {
+          let pont = items[i] || null;
+          if(pont) {
+            messages.push(getTennisMessageText(items[i].game, items[i].bet))
+          }
+        }
+
+        PREMIUM_TENIS[todayKey] = messages;
+        // console.log("fetched from sheets db: ", PREMIUM_TENIS[todayKey])
+
+        return response.json(getFinalResponse(messages))
+    });
+
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    });
+  }
 });
 
 router.get('/pont-premium-baschet', (req, res) => res.json({ soon: 'in_curand' }));
