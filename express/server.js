@@ -9,9 +9,9 @@ const https = require('https');
 const PoApi = require('../util/api');
 
 
-const FREE = {}
-const PREMIUM_FOTBAL = {}
-const PREMIUM_TENIS = {}
+let FREE = {}
+let PREMIUM_FOTBAL = {}
+let PREMIUM_TENIS = {}
 
 function isFotbal(res) {
   return (res.league.toLowerCase().indexOf('league') > -1) || 
