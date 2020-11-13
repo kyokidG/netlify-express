@@ -54,7 +54,7 @@ function getFinalResponse(messages) {
   return {
     "version": "v2",
     "content": {
-      "message": messages
+      "messages": messages
     }
   }
 }
