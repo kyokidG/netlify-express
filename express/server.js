@@ -4,6 +4,11 @@ const path = require('path');
 const serverless = require('serverless-http');
 const app = express();
 const bodyParser = require('body-parser');
+const axios = require('axios');
+const superagent = require('superagent');
+
+const PoApi = require('../util/api');
+
 
 const FREE = {
   '12-11-2020': {},
@@ -17,113 +22,151 @@ const PREMIUM_TENIS = {
   '12-11-2020': [],
 }
 
+function getKey(d) {
+  return d.getDate() + '-' + d.getMonth()+1 + '-' + d.getFullYear();
+}
+
+function getFreeGame(response) {
+  return response.body.pontGratisAzi[0].game;
+}
+function getFreeBet(response) {
+  return response.body.pontGratisAzi[0].bet;
+}
+
+function getPontGratuitMessages() {
+  // let poApi = new PoApi(http);
+
+
+}
+
+function getPontPremiumFotbalMessages() {
+  return [
+    {
+      "type": "text",
+      "text": "⚽️ Eveniment premium fotbal 1 "
+    },
+    {
+      "type": "text",
+      "text": "🏆 Castigator Eveniment premium fotbal 1"
+    },
+    {
+      "type": "text",
+      "text": "..."
+    },
+    {
+      "type": "text",
+      "text": "⚽️ Eveniment premium fotbal 2"
+    },
+    {
+      "type": "text",
+      "text": "🏆 Castigator Eveniment premium fotbal 2"
+    },
+    {
+      "type": "text",
+      "text": "..."
+    },
+    {
+      "type": "text",
+      "text": "⚽️ Eveniment premium fotbal 3"
+    },
+    {
+      "type": "text",
+      "text": "🏆 Castigator Eveniment premium fotbal 3"
+    }
+  ]
+}
+
+function getPontPremiumTenisMessages() {
+  return [
+    {
+      "type": "text",
+      "text": "🎾 Eveniment premium tenis 1 "
+    },
+    {
+      "type": "text",
+      "text": "🏆 Castigator Eveniment premium tenis 1"
+    },
+    {
+      "type": "text",
+      "text": "..."
+    },
+    {
+      "type": "text",
+      "text": "🎾 Eveniment premium tenis 2"
+    },
+    {
+      "type": "text",
+      "text": "🏆 Castigator Eveniment premium tenis 2"
+    },
+    {
+      "type": "text",
+      "text": "..."
+    },
+    {
+      "type": "text",
+      "text": "🎾 Eveniment premium tenis 3"
+    },
+    {
+      "type": "text",
+      "text": "🏆 Castigator Eveniment premium tenis 3"
+    }
+  ]
+}
+
 const router = express.Router();
 router.get('/', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.write('<h1>Hello George.js!</h1>');
+  res.write('<h1>Salut curiosule!</h1>');
+  res.write('<p>Ne plac oamenii curiosi ca tine. Daca vrei sa lucrezi cu noi, trimite-ne un email pe collabs-at-ponturi-sportive.ro</p>');
   res.end();
 });
-// https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi
-router.get('/another', (req, res) => res.json({ route: req.originalUrl }));
-router.get('/pont-gratuit', (req, res) => res.json({
-  "version": "v2",
-  "content": {
-    "messages": [
+
+router.get('/pont-gratuit', async (req, response) => {
+
+  superagent.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/pontGratisAzi')
+  // .query({ api_key: 'DEMO_KEY', date: '2017-08-02' })
+  .end((err, res) => {
+    if (err) { return console.log(err); }
+    let messages = [
       {
         "type": "text",
-        "text": "🎾 Eveniment gratuit "
+        "text": "🎾 " + getFreeGame(res)
       },
       {
         "type": "text",
-        "text": "🏆 Castigator eveniment gratuit"
-      },
-    ]}
-}));
-router.get('/pont-premium-fotbal', (req, res) => res.json({
-  "version": "v2",
-  "content": {
-    "messages": [
-      {
-        "type": "text",
-        "text": "⚽️ Eveniment premium fotbal 1 "
-      },
-      {
-        "type": "text",
-        "text": "🏆 Castigator Eveniment premium fotbal 1"
-      },
-      {
-        "type": "text",
-        "text": "..."
-      },
-      {
-        "type": "text",
-        "text": "⚽️ Eveniment premium fotbal 2"
-      },
-      {
-        "type": "text",
-        "text": "🏆 Castigator Eveniment premium fotbal 2"
-      },
-      {
-        "type": "text",
-        "text": "..."
-      },
-      {
-        "type": "text",
-        "text": "⚽️ Eveniment premium fotbal 3"
-      },
-      {
-        "type": "text",
-        "text": "🏆 Castigator Eveniment premium fotbal 3"
-      },
-      {
-        "type": "text",
-        "text": "..."
-      },
-    ]}
-}));
-router.get('/pont-premium-tenis', (req, res) => res.json({
-  "version": "v2",
-  "content": {
-    "messages": [
-      {
-        "type": "text",
-        "text": "🎾 Eveniment premium tenis 1 "
-      },
-      {
-        "type": "text",
-        "text": "🏆 Castigator Eveniment premium tenis 1"
-      },
-      {
-        "type": "text",
-        "text": "..."
-      },
-      {
-        "type": "text",
-        "text": "🎾 Eveniment premium tenis 2"
-      },
-      {
-        "type": "text",
-        "text": "🏆 Castigator Eveniment premium tenis 2"
-      },
-      {
-        "type": "text",
-        "text": "..."
-      },
-      {
-        "type": "text",
-        "text": "🎾 Eveniment premium tenis 3"
-      },
-      {
-        "type": "text",
-        "text": "🏆 Castigator Eveniment premium tenis 3"
-      },
-      {
-        "type": "text",
-        "text": "..."
-      },
-    ]}
-}));
-router.get('/pont-premium-baschet', (req, res) => res.json({ pont: 'premium_baschet' }));
+        "text": "🏆 " + getFreeBet(res)
+      }
+    ]
+    console.log(messages)
+
+    return response.json({
+      "version": "v2",
+      "content": {
+        "messages": messages
+      }
+    })
+  });
+});
+
+router.get('/pont-premium-fotbal', (req, res) => {
+  return res.json({
+    "version": "v2",
+    "content": {
+      "messages": getPontPremiumFotbalMessages()
+    }
+  })
+});
+
+router.get('/pont-premium-tenis', (req, res) => {
+  return res.json({
+    "version": "v2",
+    "content": {
+      "messages": getPontPremiumTenisMessages()
+    }
+  })
+});
+
+router.get('/pont-premium-baschet', (req, res) => res.json({ soon: 'in_curand' }));
 router.post('/', (req, res) => res.json({ postBody: req.body }));
 
 app.use(bodyParser.json());
