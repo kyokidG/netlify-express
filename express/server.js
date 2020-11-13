@@ -128,7 +128,7 @@ router.get('/pont-premium-fotbal', (req, response) => {
         for(let i=0;i<=items.length;i++) {
           let pont = items[i] || null;
           if(pont) {
-            messages.push(getFotbalMessageText(items[i].game, items[i].bet))
+            messages.push(...getFotbalMessageText(items[i].game, items[i].bet))
           }
         }
 
@@ -166,7 +166,7 @@ router.get('/pont-premium-tenis', (req, response) => {
         for(let i=0;i<=items.length;i++) {
           let pont = items[i] || null;
           if(pont) {
-            messages.push(getTennisMessageText(items[i].game, items[i].bet))
+            messages.push(...getTennisMessageText(items[i].game, items[i].bet))
           }
         }
 
