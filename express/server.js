@@ -182,6 +182,16 @@ router.get('/pont-premium-tenis', (req, response) => {
   }
 });
 
+router.get('/cache-clean', (req, res) => {
+  FREE = {}
+  PREMIUM_FOTBAL = {}
+  PREMIUM_TENIS = {}
+
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.write('<h1>Cache cleared</h1>');
+  res.end();
+});
+
 router.get('/pont-premium-baschet', (req, res) => res.json({ soon: 'in_curand' }));
 router.post('/', (req, res) => res.json({ postBody: req.body }));
 
