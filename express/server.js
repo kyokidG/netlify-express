@@ -28,25 +28,24 @@ function getFreeGame(response) {
 function getFreeBet(response) {
   return response.pontGratisAzi[0].bet;
 }
+function getFreeLeague(response) {
+  return response.pontGratisAzi[0].league;
+}
 
-function getTennisMessageText(game, bet) {
+function getTennisMessageText(league, game, bet) {
   return [{
     "type": "text",
-    "text": "🎾 " + game
-  },
-  {
-    "type": "text",
-    "text": "🏆 " + bet
+    "text": `🏆 ${league} 
+             🎾 ${game} 
+             🏅 ${bet}`,
   }]
 }
-function getFotbalMessageText(game, bet) {
+function getFotbalMessageText(league, game, bet) {
   return [{
     "type": "text",
-    "text": "⚽️ " + game
-  },
-  {
-    "type": "text",
-    "text": "🏆 " + bet
+    "text": `🏆 ${league} 
+             ⚽ ${game} 
+             🏅 ${bet}`,
   }]
 }
 
@@ -88,9 +87,9 @@ router.get('/pont-gratuit', async (req, response) => {
         let res = JSON.parse(data);
         let messages;
         if (isFotbal(res.pontGratisAzi[0])) { 
-          messages = [...getFotbalMessageText(getFreeGame(res), getFreeBet(res))]
+          messages = [...getFotbalMessageText(getFreeLeague(res), getFreeGame(res), getFreeBet(res))]
         } else { 
-          messages = [...getTennisMessageText(getFreeGame(res), getFreeBet(res))]
+          messages = [...getTennisMessageText(getFreeLeague(res), getFreeGame(res), getFreeBet(res))]
         }
 
         FREE[todayKey] = messages;
@@ -128,7 +127,7 @@ router.get('/pont-premium-fotbal', (req, response) => {
         for(let i=0;i<=items.length;i++) {
           let pont = items[i] || null;
           if(pont) {
-            messages.push(...getFotbalMessageText(items[i].game, items[i].bet))
+            messages.push(...getFotbalMessageText(items[i].league, items[i].game, items[i].bet))
           }
         }
 
@@ -166,7 +165,7 @@ router.get('/pont-premium-tenis', (req, response) => {
         for(let i=0;i<=items.length;i++) {
           let pont = items[i] || null;
           if(pont) {
-            messages.push(...getTennisMessageText(items[i].game, items[i].bet))
+            messages.push(...getTennisMessageText(items[i].league, items[i].game, items[i].bet))
           }
         }
 
@@ -187,7 +186,10 @@ router.get('/clean-cache', (req, res) => {
   PREMIUM_FOTBAL = {}
   PREMIUM_TENIS = {}
 
-  return res.json({ clean_cache: 'true' })
+  return res.json(getFinalResponse([{
+    "type": "text",
+    "text": "CLEAN SUCCESS!"
+  }]))
 });
 
 
