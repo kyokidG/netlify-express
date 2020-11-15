@@ -36,16 +36,16 @@ function getTennisMessageText(league, game, bet) {
   return [{
     "type": "text",
     "text": `🏆 ${league} 
-             🎾 ${game} 
-             🏅 ${bet}`,
+🎾 ${game} 
+🏅 ${bet}`,
   }]
 }
 function getFotbalMessageText(league, game, bet) {
   return [{
     "type": "text",
     "text": `🏆 ${league} 
-             ⚽ ${game} 
-             🏅 ${bet}`,
+⚽ ${game} 
+🏅 ${bet}`,
   }]
 }
 
