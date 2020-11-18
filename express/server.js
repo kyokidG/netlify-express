@@ -196,7 +196,7 @@ router.get('/pont-premium-tenis', (req, response) => {
       resp.on('end', () => {
         let res = JSON.parse(data);
         let messages = [];
-        let items = res.tenisAzi;
+        let items = res.baschetAzi;
         for(let i=0;i<=items.length;i++) {
           let pont = items[i] || null;
           if(pont) {
