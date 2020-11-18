@@ -12,6 +12,7 @@ const PoApi = require('../util/api');
 let FREE = {}
 let PREMIUM_FOTBAL = {}
 let PREMIUM_TENIS = {}
+let PREMIUM_BASCHET = {}
 
 function isFotbal(res) {
   return (res.league.toLowerCase().indexOf('league') > -1) || 
@@ -33,20 +34,54 @@ function getFreeLeague(response) {
 }
 
 function getTennisMessageText(league, game, bet) {
-  return [{
-    "type": "text",
-    "text": `🏆 ${league} 
+  if(league) {
+    return [{
+      "type": "text",
+      "text": `🎾 ${game} 
+🏅 ${bet}`,
+    }]
+  } else {
+    return [{
+      "type": "text",
+      "text": `🏆 ${league} 
 🎾 ${game} 
 🏅 ${bet}`,
-  }]
+    }]
+  }
 }
+
 function getFotbalMessageText(league, game, bet) {
-  return [{
-    "type": "text",
-    "text": `🏆 ${league} 
+  if(league) {
+    return [{
+      "type": "text",
+      "text": `⚽ ${game} 
+🏅 ${bet}`,
+    }]
+  } else {
+    return [{
+      "type": "text",
+      "text": `🏆 ${league} 
 ⚽ ${game} 
 🏅 ${bet}`,
-  }]
+    }]
+  }
+}
+
+function getBaschetMessageText(league, game, bet) {
+  if(league) {
+    return [{
+      "type": "text",
+      "text": `🏀 ${game} 
+🏅 ${bet}`,
+    }]
+  } else {
+    return [{
+      "type": "text",
+      "text": `🏆 ${league} 
+🏀 ${game} 
+🏅 ${bet}`,
+    }]
+  }
 }
 
 function getFinalResponse(messages) {
@@ -181,10 +216,50 @@ router.get('/pont-premium-tenis', (req, response) => {
   }
 });
 
+router.get('/pont-premium-baschet', (req, response) => {
+  let today = new Date();
+  let todayKey = getKey(today);
+  if (PREMIUM_BASCHET[todayKey] && PREMIUM_BASCHET[todayKey].length) {
+    // console.log("fetched from cache: ", PREMIUM_BASCHET[todayKey])
+    return response.json(getFinalResponse(PREMIUM_BASCHET[todayKey]))
+  } else {
+    https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/tenisAzi', (resp) => {
+      let data = '';
+
+      // A chunk of data has been recieved.
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      // The whole response has been received. Print out the result.
+      resp.on('end', () => {
+        let res = JSON.parse(data);
+        let messages = [];
+        let items = res.tenisAzi;
+        for(let i=0;i<=items.length;i++) {
+          let pont = items[i] || null;
+          if(pont) {
+            messages.push(...getBaschetMessageText(items[i].league, items[i].game, items[i].bet))
+          }
+        }
+
+        PREMIUM_BASCHET[todayKey] = messages;
+        // console.log("fetched from sheets db: ", PREMIUM_BASCHET[todayKey])
+
+        return response.json(getFinalResponse(messages))
+    });
+
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    });
+  }
+});
+
 router.get('/clean-cache', (req, res) => {
   FREE = {}
   PREMIUM_FOTBAL = {}
   PREMIUM_TENIS = {}
+  PREMIUM_BASCHET = {}
 
   return res.json(getFinalResponse([{
     "type": "text",
