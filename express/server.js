@@ -223,7 +223,7 @@ router.get('/pont-premium-baschet', (req, response) => {
     // console.log("fetched from cache: ", PREMIUM_BASCHET[todayKey])
     return response.json(getFinalResponse(PREMIUM_BASCHET[todayKey]))
   } else {
-    https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/tenisAzi', (resp) => {
+    https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/baschetAzi', (resp) => {
       let data = '';
 
       // A chunk of data has been recieved.
