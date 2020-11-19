@@ -37,31 +37,32 @@ function getTennisMessageText(league, game, bet) {
   if(league) {
     return [{
       "type": "text",
-      "text": `🎾 ${game} 
+      "text": `🏆 ${league} 
+🎾 ${game} 
 🏅 ${bet}`,
     }]
   } else {
     return [{
       "type": "text",
-      "text": `🏆 ${league} 
-🎾 ${game} 
+      "text": `🎾 ${game} 
 🏅 ${bet}`,
     }]
   }
 }
 
 function getFotbalMessageText(league, game, bet) {
+  console.log('league: ', league)
   if(league) {
     return [{
       "type": "text",
-      "text": `⚽ ${game} 
+      "text": `🏆 ${league} 
+⚽ ${game} 
 🏅 ${bet}`,
     }]
   } else {
     return [{
       "type": "text",
-      "text": `🏆 ${league} 
-⚽ ${game} 
+      "text": `⚽ ${game} 
 🏅 ${bet}`,
     }]
   }
@@ -71,14 +72,14 @@ function getBaschetMessageText(league, game, bet) {
   if(league) {
     return [{
       "type": "text",
-      "text": `🏀 ${game} 
+      "text": `🏆 ${league} 
+🏀 ${game} 
 🏅 ${bet}`,
     }]
   } else {
     return [{
       "type": "text",
-      "text": `🏆 ${league} 
-🏀 ${game} 
+      "text": `🏀 ${game} 
 🏅 ${bet}`,
     }]
   }
@@ -143,7 +144,7 @@ router.get('/pont-premium-fotbal', (req, response) => {
   let today = new Date();
   let todayKey = getKey(today);
   if (PREMIUM_FOTBAL[todayKey] && PREMIUM_FOTBAL[todayKey].length) {
-    // console.log("fetched from cache: ", PREMIUM_FOTBAL[todayKey])
+    console.log("fetched from cache: ", PREMIUM_FOTBAL[todayKey])
     return response.json(getFinalResponse(PREMIUM_FOTBAL[todayKey]))
   } else {
     https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/fotbalAzi', (resp) => {
@@ -167,7 +168,7 @@ router.get('/pont-premium-fotbal', (req, response) => {
         }
 
         PREMIUM_FOTBAL[todayKey] = messages;
-        // console.log("fetched from sheets db: ", PREMIUM_FOTBAL[todayKey])
+        console.log("fetched from sheets db: ", PREMIUM_FOTBAL[todayKey])
         return response.json(getFinalResponse(messages))
     });
 
