@@ -15,9 +15,13 @@ let PREMIUM_TENIS = {}
 let PREMIUM_BASCHET = {}
 
 function isFotbal(res) {
-  return (res.league.toLowerCase().indexOf('league') > -1) || 
-     (res.league.toLowerCase().indexOf('serie') > -1) ||
-     (res.league.toLowerCase().indexOf('liga') > -1)
+  return res.sport.toLowerCase().indexOf('fotbal') > -1
+}
+function isBaschet(res) {
+  return res.sport.toLowerCase().indexOf('baschet') > -1
+}
+function isTenis(res) {
+  return res.sport.toLowerCase().indexOf('tenis') > -1
 }
 
 function getKey(d) {
@@ -124,8 +128,10 @@ router.get('/pont-gratuit', async (req, response) => {
         let messages;
         if (isFotbal(res.pontGratisAzi[0])) { 
           messages = [...getFotbalMessageText(getFreeLeague(res), getFreeGame(res), getFreeBet(res))]
-        } else { 
+        } else if (isTenis(res.pontGratisAzi[0])) { 
           messages = [...getTennisMessageText(getFreeLeague(res), getFreeGame(res), getFreeBet(res))]
+        } else {
+          messages = [...getBaschetMessageText(getFreeLeague(res), getFreeGame(res), getFreeBet(res))]
         }
 
         FREE[todayKey] = messages;
@@ -144,7 +150,7 @@ router.get('/pont-premium-fotbal', (req, response) => {
   let today = new Date();
   let todayKey = getKey(today);
   if (PREMIUM_FOTBAL[todayKey] && PREMIUM_FOTBAL[todayKey].length) {
-    console.log("fetched from cache: ", PREMIUM_FOTBAL[todayKey])
+    // console.log("fetched from cache: ", PREMIUM_FOTBAL[todayKey])
     return response.json(getFinalResponse(PREMIUM_FOTBAL[todayKey]))
   } else {
     https.get('https://api.sheety.co/06def408e74850aef0fbd22a79539f9f/psApi/fotbalAzi', (resp) => {
@@ -168,7 +174,7 @@ router.get('/pont-premium-fotbal', (req, response) => {
         }
 
         PREMIUM_FOTBAL[todayKey] = messages;
-        console.log("fetched from sheets db: ", PREMIUM_FOTBAL[todayKey])
+        // console.log("fetched from sheets db: ", PREMIUM_FOTBAL[todayKey])
         return response.json(getFinalResponse(messages))
     });
 
